@@ -1,0 +1,47 @@
+# Python bytecode & environments
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Testing & linting caches
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environment variables & secrets
+.env
+.env.local
+*.secret
+
+# AI agent & IDE scratch directories
+.agents/
+.gemini/
+
+# Heavy raw dataset downloads (10GB Zenodo dumps - synced to HuggingFace SidMI/TideTrace-dataset)
+data/zenodo/
+
+# Dynamic runtime job outputs
+data/jobs/*.json
+!data/jobs/.gitkeep
+data/reports/*.pdf
+!data/reports/.gitkeep
+
+# Kaggle duplicate artifacts
+scripts/kaggle_output/artifacts/
+
+# System and logs
+*.log
+Thumbs.db
+.DS_Store

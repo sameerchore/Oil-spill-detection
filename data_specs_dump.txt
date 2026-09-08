@@ -1,0 +1,1098 @@
+
+
+=== PAGE 1 ===
+
+ 
+Verdict against the oﬃcial PS 
+The portal text is short and binding. Theme is Space Technology, organisation NTRO, software, 
+deadline 20 September 2026.[1] 
+ 
+Oﬀicial clause 
+Must ship? 
+How you satisfy it 
+Detect oil slicks from satellite imagery (SAR and 
+EO mentioned as examples) 
+Yes 
+Tiled U-Net on Sentinel-1 SAR. EO/optical is optional extra, 
+not a second mandatory sensor. [1] 
+Characterise + geometric properties 
+Yes 
+Area, length, perimeter, orientation, centroid, bounding box 
+from the mask. [1] 
+Age if feasible 
+If feasible 
+only 
+Proxy: hours from hindcast origin to 
+. No chemistry 
+model. [1] 
+Oceanographic + meteorological data 
+Yes 
+Pre-cached current + 10 m wind NetCDF/JSON. Oﬀline 
+advection. [1] 
+Trace slick to origin point and time 
+Yes 
+Backward Lagrangian steps. Uncertainty cone, not a single 
+magic point. [1] 
+Predict future flow 
+Yes 
+Forward 24–48 h forecast cone. [1] 
+Historic AIS reconstruct traﬀic around origin 
+window 
+Yes 
+Local SQLite/Parquet in MarineCadastre CSV schema. 
+Synthetic AIS is explicitly allowed. [1] 
+Filter irrelevant traﬀic 
+Yes 
+Spatio-temporal radius + type filter. [1] 
+Score suspects: proximity, trajectory, behavioural 
+anomalies 
+Yes 
+Weighted, explainable scores. AIS gaps count as behaviour. 
+[1] 
+Oﬀicial clause 
+Must ship? 
+How you satisfy it 
+Automated detection and hindcasting ML model 
+Yes 
+ML is for slicks. Hindcast is deterministic physics, not a 
+second neural net. [1] 
+Rank culprit vessels 
+Yes 
+Leaderboard with reasons. [1] 
+Suitable visual interface 
+Yes 
+Map + time slider + ranked list. [1] 
+Do not drop (b) or (c). A U-Net without drift and AIS fails the expected solution. Extra wow 
+items (PDF dossier, click-to-drop spill, 3-class look-alikes) are allowed after the table above is 
+green.[1] 
+ 
+Data and APIs: free vs login vs demo-safe 
+Nothing in the PS requires a live internet call during judging. Several “free” ocean APIs still 
+need accounts. Use them only as pre-hackathon downloaders, then freeze ﬁles in data/. [1] 
+ 
+Source 
+Role 
+Cost 
+Login? 
+Use in judged 
+demo? 
+
+
+=== PAGE 2 ===
+
+Zenodo Part 
+I/II/III Sentinel-1 
+SAR (CC BY 
+4.0) 
+Train/test oil, look-alike, no-oil TIFFs + binary masks 
+Free 
+No (direct 
+Zenodo 
+download) 
+Yes, small 
+subset only. 
+Part I images 
+~40.7 GB. Do 
+not ship the 
+full dump. [3] 
+[4] 
+MarineCadastre 
+AIS CSV / bulk 
+blob 
+Real AIS schema and optional US tracks 
+Free 
+Bulk: no. 
+AccessAIS 
+custom clip: 
+currently 
+down; that 
+tool used 
+email 
+orders. 
+Prefer 
+synthetic 
+AIS in the 
+same 
+columns. PS 
+allows this. [5] 
+[2] 
+Copernicus 
+Marine CMEMS 
+currents 
+Best operational currents 
+Free 
+Yes, 
+register + 
+password 
+No live. 
+Download 
+once, cache 
+NetCDF. [6] [7] 
+ECMWF ERA5 
+via CDS 
+Best 10 m wind reanalysis 
+Free 
+Yes, CDS 
+account + 
+API key 
+No live. [8] 
+NASA OSCAR 
+currents 
+(PO.DAAC) 
+Alternate currents 
+Free 
+Earthdata 
+login 
+No live. [9] 
+HYCOM 
+OPeNDAP 
+Alternate currents 
+Free 
+Usually 
+none for 
+subset 
+Pre-cache 
+only. Large 
+files. [10] 
+NOAA GFS / 
+NOMADS 
+Alternate wind 
+Free 
+No 
+Pre-cache 
+GRIB/NetCDF. 
+[11] 
+Source 
+Role 
+Cost 
+Login? 
+Use in judged 
+demo? 
+Open-Meteo 
+Forecast + 
+Marine 
+Wind + 
+ocean_current_velocity/direction, 
+no key 
+Free non-
+commercial, 
+CC BY 4.0, 
+~10k 
+calls/day 
+No 
+Optional live 
+fallback only. 
+Cache JSON 
+for demo. [12] 
+[13] 
+OpenDrift 
+OpenOil 
+Oil trajectory library 
+Free, 
+GPLv2 
+N/A 
+Optional. 
+Frozen stack 
+uses NumPy 
+advection to 
+avoid GPL + 
+heavy deps. 
+[14] [15] 
+Rule: the product must run with airplane mode after data/ is present. Optional live Open-Meteo 
+is a toggle defaulted oﬀ. 
+ 
+Physics and ML that actually hold 
+
+
+=== PAGE 3 ===
+
+Oil damps capillary waves, so SAR backscatter drops and slicks look dark. That is why a 
+segmentation U-Net is the right ML task.[3] [1] 
+Surface drift used by operational groups: 
+ 
+ 
+OpenDriftʼs own maintainers: about 3–3.5% of wind if Stokes drift is oﬀ; default OpenOil is 2% 
+if Stokes is on. Frozen demo: 
+, Stokes oﬀ, optional 0–15° Coriolis/leeway deﬂection.[15] 
+[16] 
+ 
+Hindcast: 
+ 
+Forecast uses 
+. 
+ hour. Ensemble of particles with current/wind noise makes the 
+cone. Do not claim chemical slick age.[1] 
+AIS columns to implement (MarineCadastre dictionary): MMSI, BaseDateTime, LAT, LON, SOG, COG, 
+Heading, VesselName, IMO, CallSign, VesselType, Status, Length, Width, Draft, Cargo. [17] 
+ 
+Hardware compatibility 
+ 
+Machine 
+Job 
+Fits? 
+Kaggle P100 16 GB or 2×T4, ~30 
+h/account/week 
+Train tiled U-Net, IoU on Part III 
+Yes. 256 or 512 tiles, AMP, EﬀicientNet-B0/B2 or 
+ResNet-34. 
+Laptop RTX 4060 8 GB 
+Inference + FastAPI + Leaflet + 
+drift + AIS 
+Yes. Tiled SAR only. Never load full 2048×2048 
+batch. 
+CPU-only fallback 
+Drift, AIS, UI, cached mask 
+Yes. Demo still works if weights fail to load. 
+
+
+=== PAGE 4 ===
+
+Do not train native 2048×2048. Do not host the judged demo on Kaggle. Kaggle = factory. 4060 = 
+product. 
+SIH26143 spec sheet 
+ 
+ 
+PROJECT: TideTrace (internal name; UI title: NTRO Oil Spill Attribution Console) 
+SIH ID: SIH26143 
+ORG: National Technical Research Organisation (NTRO) 
+CATEGORY: Software 
+THEME: Space Technology 
+DEADLINE: 20 September 2026 
+ONE-LINE PITCH: Ofﬂine SAR oil-slick detector that hindcasts/forecasts drift with w 
+ 
+================================================================================ 
+0. NON-NEGOTIABLE PRODUCT RULES 
+================================================================================ 
+- Build EVERY mandatory PS clause. Do not ship segmentation without drift+AIS+UI. 
+- Judged demo MUST run fully ofﬂine on one Windows/Linux laptop (RTX 4060 8GB or CP 
+- No Docker, no cloud, no ngrok, no CMEMS/ERA5/Earthdata login at runtime. 
+- No LangChain/LangGraph, no VLM, no SAM2, no vector DB, no auth, no React build too 
+- Stack: Python 3.11, FastAPI, uvicorn, vanilla HTML+Leaﬂet (or MapLibre from CDN/v 
+- If a library is optional, the app must still run when it is missing. 
+- Deterministic demo ﬁxtures so judges never get an empty suspect list. 
+- Do not use em dashes in UI copy. 
+- Cite dataset licenses in README: Zenodo CC BY 4.0; Open-Meteo CC BY 4.0 if used; M 
+ 
+================================================================================ 
+1. FROZEN TECH STACK (DO NOT CHANGE) 
+================================================================================ 
+Python 3.11 
+fastapi, uvicorn, pydantic v2 
+numpy, scipy, pandas, pyarrow 
+rasterio, shapely, pyproj, pillow 
+opencv-python-headless 
+torch (CUDA if available, else CPU) 
+segmentation_models_pytorch 
+albumentations 
+scikit-learn (metrics only) 
+matplotlib (report plots only, optional) 
+jinja2, reportlab OR weasyprint (PDF optional; skip if install fails) 
+folium NOT required; frontend is static Leaﬂet 
+ 
+Frontend: 
+- backend/static/index.html 
+- Leaﬂet 1.9 from local vendor/ folder (no CDN required at demo) 
+- no React, no Vite, no npm build 
+ 
+ML: 
+- Architecture: UnetPlusPlus OR Unet, encoder timm-efﬁcientnet-b0 (default) or resn 
+- Classes: 3 {0: sea/background, 1: look_alike, 2: mineral_oil} 
+- Input tiles: 512x512, 2-channel VV+VH (repeat VV to 3ch if encoder needs 3) 
+- Loss: BCE+Dice on oil class, CE on 3-class, or Combo; oil class weight higher 
+
+
+=== PAGE 5 ===
+
+- Metric to report: IoU_oil, IoU_lookalike, pixel accuracy on Zenodo Part III 
+- Checkpoint: models/oil_unet_best.pt (<80 MB) 
+- If checkpoint missing: fallback dark-threshold detector (VV dB < -22) so pipeline 
+ 
+Physics: 
+- DO NOT depend on OpenDrift at runtime (GPL + heavy). 
+- Implement opendrift-equivalent 2D surface advection in numpy: 
+V = U_current + 0.03 * U_wind 
+optional deﬂection 15 deg to the right in NH 
+- Ensemble N=50 particles, current noise 0.1 m/s, wind noise 1 m/s 
+- dt = 1 hour; hindcast default 48h; forecast default 36h 
+- Optional plugin: opendrift.models.openoil if import succeeds; never required 
+ 
+AIS store: 
+- SQLite data/ais/ais.sqlite table positions 
+- CSV ingest matching MarineCadastre: 
+MMSI,BaseDateTime,LAT,LON,SOG,COG,Heading,VesselName,IMO,CallSign,VesselType,Statu 
+ 
+Ocean/wind store: 
+- data/metocean/{scene_id}.nc OR per-hour JSON grids 
+- ﬁelds: time, lat, lon, u_current, v_current, u_wind10, v_wind10 
+- bilinear interpolate in space, linear in time 
+- if ﬁle missing: constant synthetic ﬁeld documented in UI (ﬂag DEMO_METOCEAN=1) 
+ 
+================================================================================ 
+2. REPOSITORY LAYOUT 
+================================================================================ 
+tidetrace/ 
+README.md 
+LICENSE 
+requirements.txt 
+pyproject.toml 
+app/ 
+main.py 
+# FastAPI app, CORS *, static mount 
+conﬁg.py 
+# paths, weights, scoring weights, demo ﬂags 
+schemas.py 
+# pydantic request/response 
+api/ 
+detect.py 
+# POST /api/detect 
+drift.py 
+# POST /api/drift 
+ais.py 
+# POST /api/attribute 
+pipeline.py 
+# POST /api/run (full A->B->C) 
+health.py 
+# GET /api/health 
+report.py 
+# GET /api/report/{job_id} optional PDF 
+ml/ 
+dataset.py 
+# TIFF+mask tiling, 3-class relabel 
+model.py 
+# smp Unet builder 
+train.py 
+# Kaggle/local training entry 
+infer.py 
+# tile, stitch, morph cleanup 
+fallback.py 
+# sigma0 threshold fallback 
+geo/ 
+raster.py 
+# copy georef from SAR onto mask; centroid lon/lat 
+geometry.py 
+# area km2, length, perimeter, orientation 
+crs.py 
+# EPSG:4326 <-> meters (azimuthal equidistant local) 
+drift/ 
+ﬁelds.py 
+# metocean readers 
+advection.py 
+# RK2 or Euler particle steps fwd/back 
+
+
+=== PAGE 6 ===
+
+cone.py 
+# convex hull / kde envelope GeoJSON 
+ais/ 
+ingest.py 
+# CSV -> sqlite 
+interpolate.py 
+# linear interp LAT/LON/SOG/COG per MMSI 
+ﬁlter.py 
+# spatio-temporal window 
+score.py 
+# suspicion scores + reasons 
+synthetic.py 
+# generate demo trafﬁc + 1 planted culprit 
+viz/ 
+tiles.py 
+# optional PNG overlay of SAR+mask 
+jobs/ 
+store.py 
+# job_id json under data/jobs/ 
+static/ 
+index.html 
+app.js 
+style.css 
+vendor/leaﬂet/ 
+models/ 
+oil_unet_best.pt 
+# git-lfs or download script; not required to start UI 
+data/ 
+sar/ 
+# 5-10 demo GeoTIFFs + masks 
+ais/ais.sqlite 
+metocean/ 
+jobs/ 
+scripts/ 
+download_zenodo_subset.py 
+prepare_tiles.py 
+build_synthetic_ais.py 
+build_metocean_cache.py 
+train_kaggle.ipynb 
+tests/ 
+test_advection.py 
+# known vector, known displacement 
+test_geo_centroid.py 
+test_ais_gap.py 
+test_scoring.py 
+test_pipeline_ofﬂine.py 
+ 
+================================================================================ 
+3. END-TO-END PIPELINE (MUST BE ONE BUTTON) 
+================================================================================ 
+POST /api/run 
+input: 
+scene_id OR uploaded GeoTIFF (VV, optional VH) 
+t_sat ISO-8601 UTC 
+hindcast_hours (default 48) 
+forecast_hours (default 36) 
+search_radius_km (default 10) 
+origin_window_hours (default +/- 3) 
+ 
+steps (observable in UI trace): 
+1. DETECT: mask, oil polygons, look-alike polygons rejected from attribution 
+2. CHAR: for each oil polygon: area_km2, perimeter_km, length_km (max Feret), 
+orientation_deg, centroid_lat, centroid_lon, pixel_count 
+3. AGE_PROXY: age_hours = t_sat - t_origin_median (after step 4; show "proxy") 
+4. HINDCAST: ensemble back to origin_time_est and origin_zone polygon 
+5. FORECAST: ensemble forward; list threatened bbox (coast ﬂag if land mask exist 
+land mask optional; if missing skip) 
+
+
+=== PAGE 7 ===
+
+6. AIS: query tracks intersecting origin cone buffered by search_radius_km 
+in [t_origin - window, t_origin + window] 
+7. FILTER: drop vessels never inside radius; drop land-only if any 
+8. SCORE: rank; return top 10 with reason codes 
+9. TRACE: JSON list of steps with timings and conﬁdence 
+ 
+If detect ﬁnds no oil: still return empty polygons, do not crash; UI shows "no slic 
+Demo scenes MUST contain oil. 
+ 
+================================================================================ 
+4. MODULE A — SAR DETECTION AND CHARACTERISATION 
+================================================================================ 
+4.1 Data 
+- Zenodo: 
+Part I 10.5281/zenodo.8346860 oil train/val 1200 2048x2048x2 Sigma0 dB TIFF 
+Part II 10.5281/zenodo.8253899 look-alike + oil-free 
+Part III 10.5281/zenodo.13761290 test 150 per class 
+- Masks are often NOT georeferenced. ALWAYS copy transform/CRS from the SAR TIFF 
+onto the mask before any lat/lon math. 
+- Relabel: 
+oil folder mask 1 -> class 2 
+look-alike folder mask 1 -> class 1 
+oil-free -> all 0 
+- Training subset for hackathon: 400 oil, 250 look-alike, 150 empty, 512 tiles, 
+overlap 64, ignore tiles with <50 oil pixels unless empty class. 
+ 
+4.2 Inference 
+- Pad/tile 512, softmax, stitch by max/average 
+- Keep class 2 connected components area >= 0.05 km2 (or 500 px if no scale) 
+- Look-alikes (class 1) drawn yellow on map, excluded from AIS attribution 
+- Conﬁdence = mean oil softmax inside polygon 
+ 
+4.3 Geometry (EPSG:4326 -> local meters via pyproj aeqd at centroid) 
+- area_km2, perimeter_km 
+- length_km = max pairwise distance on polygon exterior simpliﬁed 
+- orientation_deg = PCA of polygon coords (0-180) 
+- compactness = 4*pi*area/perimeter^2 
+- centroid lat/lon 
+- Export GeoJSON FeatureCollection 
+ 
+4.4 Age 
+- Do NOT estimate chemical weathering. 
+- After hindcast, age_hours_proxy = hours between origin median timestamp and t_sat. 
+- UI label: "Estimated time since origin (drift proxy), not lab age" 
+ 
+================================================================================ 
+5. MODULE B — METOCEAN HINDCAST / FORECAST 
+================================================================================ 
+5.1 Field lookup 
+function velocity(lat, lon, t): 
+u_c, v_c = interp current 
+u_w, v_w = interp 10m wind 
+alpha = 0.03 
+# wind vector: meteorological u/v already toward-east / toward-north 
+return u_c + alpha*u_w, v_c + alpha*v_w 
+
+
+=== PAGE 8 ===
+
+5.2 Integrator 
+- Convert deg to metres with local aeqd, step, convert back 
+- Euler OK; RK2 preferred 
+- Particles seeded in oil polygon (or 1 km disk around centroid if polygon tiny) 
+- Backward: dt negative 
+- Store hourly mean track + 50/90 percent envelope polygons 
+ 
+5.3 Origin deﬁnition 
+- origin_time = time when ensemble median speed relative to AIS search is used 
+Default: time of maximum compactness of ensemble OR last hindcast hour 
+FROZEN RULE: origin_time = t_sat - H hours where H is chosen by 
+"ﬁrst time ensemble spread radius exceeds 8 km" clipped to [6h, 48h], 
+AND also return the full track so judges see the path. 
+- origin_zone = 90% envelope at origin_time, buffered 2 km 
+- ALWAYS show uncertainty. Never a single 400 m pin unless synthetic planted spill. 
+ 
+5.4 Forecast 
+- Same ensemble forward forecast_hours 
+- Return GeoJSON cone + list of hourly centroids 
+ 
+5.5 Metocean ﬁles for demo 
+Create THREE cached boxes covering demo scenes (Arabian Sea / Bay of Bengal / 
+generic mid-ocean). Each 2-degree tile, hourly, 4 days. 
+Generator script may CALL Open-Meteo once while online: 
+https://api.open-meteo.com/v1/forecast wind_speed_10m, wind_direction_10m 
+https://marine-api.open-meteo.com/v1/marine ocean_current_velocity, ocean_current 
+Convert direction/speed to u,v. Save NetCDF/JSON. Runtime reads ﬁles only. 
+ 
+================================================================================ 
+6. MODULE C — AIS FILTER AND SCORING 
+================================================================================ 
+6.1 Synthetic generator (REQUIRED for demo reliability) 
+scripts/build_synthetic_ais.py 
+- Region: same bbox as demo SAR 
+- 25-40 vessels over 72 h, 5 min samples 
+- Types: tanker, chemical tanker, cargo, container, ﬁshing, passenger, tug 
+- PLANT exactly 1 culprit: 
+tanker MMSI 419000001 name "MT OCEAN VOYAGER" 
+passes within 0.4-1.5 km of backtrack origin at origin_time 
+SOG 11-13 kn steady 
+optional 40-70 min AIS gap whose interpolated segment crosses origin 
+- 2 distractors: ﬁshing boat close but wrong type; cargo 8 km away 
+- Remaining trafﬁc far or wrong time 
+- Write CSV + sqlite 
+ 
+6.2 Real AIS ingest (optional) 
+- Accept MarineCadastre CSV 
+- Index: (time, lat, lon) R-tree if possible; else time-chunked tables 
+- Do not download nationwide US days into the repo 
+ 
+6.3 Filter 
+Keep MMSI if ANY interpolated point is within search_radius_km of origin_zone 
+AND timestamp in [t_origin - W, t_origin + W] hours 
+Interpolate each track to 1 min inside window 
+ 
+6.4 Scores in [0,1], then weighted sum, then min-max to 0-100 for UI 
+
+
+=== PAGE 9 ===
+
+ 
+S_proximity: 
+d_km = min distance from interpolated track to origin_zone boundary (0 if inside) 
+S_proximity = exp(-d_km / 3.0) 
+ 
+S_trajectory: 
+1 if track heading vs origin-to-slick vector within 45 deg around the time of clos 
+else 0.4 
+(simple; document in UI) 
+ 
+S_vessel_type: 
+crude/oil tanker 1.0 
+chemical tanker 0.9 
+tanker (generic) 0.85 
+bulk cargo 0.55 
+container 0.45 
+cargo 0.5 
+ﬁshing 0.2 
+passenger 0.05 
+unknown 0.3 
+Map MarineCadastre VesselType numeric codes to these buckets (include a dict). 
+ 
+S_behavior = max of: 
+- operational_discharge: 0.7 if 8 <= SOG <= 16 kn at closest approach 
+- course_change: 0.6 if |dCOG| > 30 deg within +/- 20 min of closest approach 
+- speed_drop: 0.5 if SOG drops > 5 kn 
+- ais_gap: 0.95 if gap >= 30 min AND dead-reckoning segment passes within 5 km of 
+else 0.1 
+ 
+FROZEN WEIGHTS (editable in conﬁg.py, shown in UI): 
+w_prox=0.40 w_type=0.20 w_traj=0.15 w_beh=0.25 
+raw = w·S 
+UI percent = 100 * raw / max_possible (max_possible = 1.0) 
+ 
+Return reasons[] e.g. ["min_distance_0.6km", "type_tanker", "ais_gap_52min", "sog_12 
+ 
+6.5 Dark vessel 
+If gap: draw dashed red interpolated line on map; badge "NON-REPORTING" 
+ 
+================================================================================ 
+7. API CONTRACT 
+================================================================================ 
+GET /api/health 
+{ok, cuda, model_loaded, ais_rows, metocean_scenes, mode: "ofﬂine"} 
+ 
+GET /api/scenes 
+list demo scenes {id, title, t_sat, path, thumbnail} 
+ 
+POST /api/detect 
+multipart ﬁle OR {"scene_id"} 
+-> {job_id, polygons[], lookalikes[], metrics} 
+ 
+POST /api/drift 
+{job_id or centroid, t_sat, hours_back, hours_fwd} 
+-> {origin, hindcast_track, forecast_track, cone_back, cone_fwd} 
+
+
+=== PAGE 10 ===
+
+POST /api/attribute 
+{origin_geojson, t_origin, radius_km, window_h} 
+-> {suspects:[{rank,mmsi,name,type,score,reasons,track}]} 
+ 
+POST /api/run 
+full pipeline, combines above, writes data/jobs/{id}.json 
+ 
+GET /api/jobs/{id} 
+GET /api/jobs/{id}/geojson 
+GET /static/... 
+ 
+POST /api/demo/inject OPTIONAL after core works 
+{lat, lon, t_sat} uses synthetic AIS + cached metocean; no SAR ﬁle needed 
+still must run drift+AIS so judges can click ocean 
+ 
+Optional PDF POST /api/report/{id} 
+"Maritime Pollution Attribution Note" 2-3 pages 
+skip entirely if reportlab missing 
+ 
+================================================================================ 
+8. UI (static/index.html) — NAVAL FORENSIC LAYOUT 
+================================================================================ 
+Left: map (full height) 
+- Layer SAR grayscale PNG overlay (pre-rendered or runtime colorize dB) 
+- Oil polygon neon magenta 
+- Look-alike yellow dashed 
+- Hindcast dotted white trail + cone 
+- Forecast orange cone 
+- AIS tracks colored by rank; culprit thick red 
+- Time slider playing AIS positions 
+- Scale, lat/lon readout, UTC clock 
+ 
+Right sidebar: 
+- Scene selector 
+- RUN PIPELINE button 
+- Detection stats (area, length, orientation, conﬁdence, age proxy) 
+- Origin time + lat/lon 
+- Suspect leaderboard rank, name, MMSI, score bar, reasons 
+- Expand track mini-stats 
+- Toggle layers 
+- Trace log (step times) 
+- Banner: OFFLINE MODE 
+ 
+Must work at 1366x768. No login screen. 
+ 
+================================================================================ 
+9. TRAINING (KAGGLE, NOT IN DEMO PATH) 
+================================================================================ 
+scripts/train_kaggle.ipynb 
+- Dataset tiles from /kaggle/input or copied subset 
+- 30-40 epochs, AdamW 1e-4, cosine, AMP, batch 8 on P100 / 4 on T4 
+- Save best val IoU_oil 
+- Export oil_unet_best.pt 
+- Print table IoU sea / look-alike / oil 
+Laptop only loads checkpoint. 
+
+
+=== PAGE 11 ===
+
+================================================================================ 
+10. TESTS (MUST PASS BEFORE UI POLISH) 
+================================================================================ 
+- test_advection: particle with u=1 m/s, v=0, dt=3600 -> ~3.6 km east 
+- test_geo: synthetic raster with known afﬁne, centroid error < 1e-4 deg 
+- test_ais_gap: planted gap interpolated across origin ﬂags ais_gap 
+- test_scoring: planted tanker ranks #1 
+- test_pipeline_ofﬂine: monkeypatch network; /api/run succeeds 
+ 
+================================================================================ 
+11. DEMO SCRIPT (3 MINUTES) 
+================================================================================ 
+Scene: "Arabian Sea Sentinel-1 demo" 
+1. Show raw SAR dark patch 
+2. Detect: magenta polygon, area, look-alike rejected 
+3. Hindcast slider: cone walks back 18-36 h 
+4. AIS playback: ships appear; tanker ﬂashes 
+5. Leaderboard: MT OCEAN VOYAGER ~90% with gap + proximity + type 
+6. Forecast cone toward a dummy EEZ box 
+Say: "NTRO clause (a)(b)(c) in one ofﬂine pipeline." 
+ 
+Backup: if GPU OOM, fallback threshold still shows polygon and full (b)(c). 
+ 
+================================================================================ 
+12. README MUST STATE LIMITATIONS (JUDGES TRUST THIS) 
+================================================================================ 
+- SAR research scenes are not live RISAT tasking 
+- AIS for demo is synthetic in MarineCadastre schema (PS-allowed) 
+- Age is drift-time proxy 
+- Attribution is ranked likelihood, not legal proof 
+- Metocean cached; live CMEMS not used at inference 
+ 
+================================================================================ 
+13. IMPLEMENTATION ORDER FOR ANTIGRAVITY 
+================================================================================ 
+Day order (do not skip): 
+1. FastAPI hello + static Leaﬂet map + /api/health 
+2. geometry + raster centroid on one GeoTIFF 
+3. numpy advection unit test + dummy current/wind 
+4. synthetic AIS sqlite + scoring unit test (planted ship #1) 
+5. wire /api/run with MOCK mask if model absent 
+6. U-Net infer if weights exist, else threshold fallback 
+7. UI layers + time slider + leaderboard 
+8. 3-class training notebook last 
+9. optional PDF and inject-click 
+ 
+NEVER start with training. NEVER block UI on CUDA. 
+ 
+================================================================================ 
+14. CONFIG DEFAULTS (app/conﬁg.py) 
+================================================================================ 
+ALPHA_WIND = 0.03 
+DEFLECTION_DEG = 15 
+ENSEMBLE_N = 50 
+DT_SECONDS = 3600 
+HINDCAST_H = 48 
+
+
+=== PAGE 12 ===
+
+ 
+ 
+Feasibility call 
+This is buildable in the SIH window if the mock pipeline (threshold mask + numpy drift + 
+synthetic AIS + Leaﬂet) exists before the 36-hour clock, and Kaggle only improves IoU. Live 
+CMEMS/ERA5 would make the demo fragile because both need logins. Cached Open-Meteo or 
+hand-built NetCDF does not.[7] [13] [1] 
+You are not building less than the PS: detection, geometry, age proxy, hindcast, forecast, AIS 
+ﬁlter, multi-factor score, visual interface. You are refusing unpaid extras that the portal never 
+asked for (live global AIS, 3D hydrodynamics, legal-proof identity).[1] 
+Do not add a VLM, OpenDrift as a hard dependency, or React. 
+Synthetic data is allowed in one place only: AIS, and only if real AIS for that spill region is not 
+available. SAR must be real Zenodo (or other real SAR/EO). Ocean and weather must be real 
+fields, cached offline. Do not mock masks, scores, or drift.sih2026.vuce 
+Synthetic: only what the PS allows 
+The portal says: get AIS format from MarineCadastre; use real AIS if available; else prepare 
+synthetic AIS for the region of the oil spill to show the algorithm. Satellite data is the Zenodo 
+Sentinel-1 set. Clause (b) requires oceanographic and meteorological data, with no synthetic 
+option.sih2026.vuce 
+Input 
+Mock/synthetic? 
+What to do 
+SAR / oil 
+masks 
+No 
+Real Zenodo Part I/II/III TIFFs + masks. 
+Train a real U-Net. zenodo 
+EO/optical 
+Not required 
+PS says “such as SAR and EO.” SAR 
+alone satisfies the sensor clause. 
+sih2026.vuce 
+Currents + 
+10 m wind 
+No 
+Real fields, pre-downloaded (Open-
+Meteo no key, or HYCOM/GFS). Cache 
+NetCDF. No constant fake current. 
+open-meteo+1 
+AIS 
+Only if real tracks for 
+that scene bbox/time 
+do not exist 
+Prefer MarineCadastre CSV when the 
+SAR footprint is in US NAIS coverage. 
+Otherwise generate tracks in that 
+scene’s real lat/lon/time, same 
+columns. Indian DGLL NAIS is not a 
+public student feed. fisheries.noaa+2 
+Scores, 
+polygons, 
+Never 
+Compute from mask, advection, and 
+AIS. If the tanker is not closest, it must 
+  
+ 
+  
+ 
+   
+  
+ 
+TILE = 512 
+OFFLINE = True 
+  
+ 
+
+
+=== PAGE 13 ===
+
+Input 
+Mock/synthetic? 
+What to do 
+origin 
+not win. 
+Click-to-
+drop fake 
+spill 
+Not in the PS 
+Cut from MVP. Optional wow after the 
+real scene works. 
+India-wide live AIS and CMEMS/ERA5 logins are not in the PS. Using them live would make a 
+wrapper around vendor APIs. Cache files in data/ and run airplane-mode.marine.copernicus+1 
+Anti-slop rules (paste on top of the spec) 
+If Antigravity emits any of these, reject the code: 
+ 
+Hardcoded leaderboard, score: 92.4, or a fixed MMSI winner 
+ 
+/api/run returning fixture JSON without calling detect, advection, and AIS join 
+ 
+Random or constant 𝑢, 𝑣labelled as “currents” 
+ 
+Synthetic SAR blobs instead of Zenodo TIFFs 
+ 
+UI that only filters a table (CRUD) 
+ 
+OpenDrift/CMEMS/Open-Meteo as a required runtime import 
+ 
+Demo that dies without CUDA (threshold is a published baseline, not the product) 
+What must be real engineering: 
+ 
+Learned 3-class segmentation (sea / look-alike / oil) with an IoU table on Part IIIzenodo+1 
+ 
+Georeferenced polygon math (copy affine from SAR onto mask; area, length, perimeter, 
+orientation, centroid) 
+ 
+Lagrangian advection 𝑉= 𝑈𝑐𝑢𝑟𝑟𝑒𝑛𝑡+ 0.03𝑈𝑤𝑖𝑛𝑑with unit tests (1 m/s × 3600 s ≈ 3.6 
+km)github 
+ 
+Spatio-temporal AIS join and explainable scores (proximity, trajectory, type, anomalies, 
+gaps)sih2026.vuce 
+ 
+Empty result allowed on a true-negative scene (look-alike only). Do not force a culprit. 
+Minimum viable vs wow 
+Ship these or you are under the PS 
+ 
+(a) Detect oil on real SAR; reject look-alikes as a separate class 
+ 
+(a) Geometric properties from the oil polygon 
+ 
+(a) Age only as drift-time proxy, labelled as proxy 
+ 
+(b) Hindcast to origin zone + time using real cached metocean 
+ 
+(b) Forecast 24–36 h cone 
+ 
+(c) AIS reconstruct, filter, score, rank, with reasons 
+ 
+Visual map: SAR, oil, cones, tracks, time slider, leaderboard, step trace 
+ 
+Offline laptop demo (4060 8 GB or CPU for physics+AIS) 
+
+
+=== PAGE 14 ===
+
+Wow, only after the list above is green 
+ 
+AIS dark-vessel gap as a first-class reason code (still real timestamps, not theatre) 
+ 
+Uncertainty cone (ensemble), not a 400 m pin 
+ 
+Metrics card: IoU vs a −22 dB threshold baseline (shows you are not a wrapper) 
+ 
+Optional PDF attribution note 
+ 
+Optional second real scene (true negative look-alike) 
+ 
+Optional OpenDrift comparison overlay (GPL, extra, never required) 
+Cut. Not asked. Makes it slop 
+ 
+Chatbot / VLM / SAM2 / agent 
+ 
+Live CMEMS, ERA5, Earthdata, ngrok, Kaggle-hosted demo 
+ 
+Click-anywhere “inject spill” as the main path 
+ 
+Nationwide AIS download, user accounts, Docker, React SPA 
+ 
+Chemical weathering / 3D hydrodynamics 
+ 
+Guaranteed Rank-1 tanker in synthetic generator via score hacking 
+Synthetic AIS, when used, must be a traffic simulator over the real scene geobox, then scored 
+blindly. Planting a tanker on the origin and then “detecting” it is the wrapper version of this 
+PS.sih2026.vuce 
+Gaps: not good to go until these are closed 
+1. AIS geography. Zenodo scenes are georeferenced, but they are not “Indian EEZ + public 
+AIS.” First check whether demo TIFFs fall in MarineCadastre coverage. If yes, use real AIS. If 
+no, synthetic AIS is the PS path, not a shortcut.zenodo+1 
+2. Mask CRS. Many Zenodo masks have no georeference. Copy transform/CRS from the 
+matching SAR TIFF or centroids are fiction.zenodo 
+3. Disk. Part I images are ~40.7 GB. You need a real 5–10 scene demo subset plus a training 
+tile subset this week, not the full dump on Day 1.zenodo 
+4. Metocean alignment. Clause (b) needs currents and winds at the scene time. Open-Meteo 
+(no key) or HYCOM/GFS must be downloaded for those bboxes before judging. Runtime 
+stays offline.open-meteo+1 
+5. Age. PS says “if feasible.” A chemistry age model is a gap you should not fill. Proxy hours 
+from hindcast is enough; label it honestly.sih2026.vuce 
+6. EO. Mentioned as an example sensor. Skipping optical is not a gap. Adding a fake RGB 
+branch would be slop.sih2026.vuce 
+7. Legal output. Ranked likelihood, not “this vessel is guilty.” NTRO will care. 
+8. Theme mismatch in your notes. Official theme is Space Technology, not Disaster 
+Management. Fix the pitch deck.sih2026.vuce 
+9. Team split. This is not a one-model app. Someone owns SAR+IoU, someone owns 
+advection+CRS tests, someone owns AIS scoring+UI. If one person “asks Antigravity for the 
+app,” you get a wrapper. 
+
+
+=== PAGE 15 ===
+
+10. PS clauses (a)(b)(c); Zenodo exists and is CC BY 4.0; AIS schema is public; wind factor ~3% is 
+standard; 4060 + Kaggle can train tiled U-Net; CMEMS/ERA5 logins are avoidable if you 
+cache.zenodo+2 
+11. You are good to go on architecture once gap 1 (real vs synthetic AIS per scene), gap 2 (mask 
+georef), gap 3 (subset on disk), and gap 4 (cached metocean for those scenes) are done in the 
+repo, not in a slide. 
+ 
+The leftover are research gaps, not product ideas. They are closed below with a 
+concrete path. Training is a from-scratch decoder + ImageNet encoder U-Net on 
+tiles, not LLM fine-tuning. On your Kaggle P100/T4 that is hours, not days.mdpi+1 
+Gap closures 
+1. AIS vs scene geography (was the real blocker) 
+The Zenodo set is built from 685 full Sentinel-1 GRD scenes whose oil labels come 
+from NOAA and EMSA, then cut to 2048×2048 chips. That is mixed US and 
+European water, not Indian NAIS. Indian DGLL AIS is not a public student 
+feed.dgll+1 
+Rule (do this in code, not in a slide): 
+ Read each demo GeoTIFF bounds + TIFFTAG_DATETIME / metadata time. 
+ If the bbox intersects US NAIS (Gulf of Mexico, US East/West/Alaska coastal boxes 
+used by MarineCadastre), ingest real AIS CSV for that day.fisheries.noaa 
+ Otherwise use synthetic AIS only, in MarineCadastre columns, inside that chip’s 
+real lat/lon and time. The PS allows this exact fallback.sih2026.vuce 
+Do not invent Indian EEZ AIS. Do not plant a tanker on the origin and then “detect” 
+it. 
+2. Mask CRS 
+Masks are often bare 2048×2048 TIFFs. Copy transform and crs from the matching 
+Sigma0 image with rasterio before any centroid. If CRS is still missing, drop that 
+chip from the demo set.zenodo 
+3. Disk 
+Part I oil images are ~40.7 GB. Do not download all of it to the laptop.zenodo 
+Minimum real subset: 
+ Train tiles: ~300–400 oil + ~200 look-alike + ~150 empty from Parts I/II 
+ Demo: 4 oil chips + 1 look-alike true-negative from Part III (georeferenced) 
+ Keep full Part III (150×3) only on Kaggle for the IoU tablezenodo+1 
+4. Metocean (clause b, not mockable) 
+Open-Meteo needs no key for non-commercial use. Cache once, then airplane-
+mode.open-meteo 
+ Wind: https://archive-api.open-meteo.com/v1/archive hourly wind_speed_10m, 
+
+
+=== PAGE 16 ===
+
+wind_direction_10m (ERA5, 1940–present).open-meteo 
+ Currents: Marine API ocean_current_velocity, ocean_current_direction; SMOC 
+currents from Jan 2022, ERA5-Ocean hourly from 1940; start_date/end_date 
+supported.open-meteo+1 
+Script: for each demo centroid, pull T_sat ± 48 h, convert speed/direction to 𝑢, 𝑣, 
+write NetCDF/JSON. Runtime never calls the API. If a chip is pre-2022 and SMOC is 
+empty, use ERA5-Ocean currents plus ERA5 wind.open-meteo 
+5. Age 
+Leave as hours from hindcast origin to 𝑇𝑠𝑎𝑡, labelled “drift-time proxy.” Chemistry 
+age is not feasible in 36 hours and the PS already hedges.sih2026.vuce 
+6. EO optical 
+SAR satisfies “such as SAR and EO.” No second sensor.sih2026.vuce 
+7–8. Pitch 
+Theme is Space Technology. Output is ranked likelihood, not guilt.sih2026.vuce 
+9. Physics constant 
+Use 𝑉= 𝑈𝑐𝑢𝑟𝑟𝑒𝑛𝑡+ 0.03 𝑈𝑤𝑖𝑛𝑑(Stokes off). That matches OpenDrift’s stated 3–
+3.5% when Stokes is not double-counted.github 
+Nothing in that list is still “unknown.” Remaining work is download, georef check, 
+cache, train, tests. 
+What you are actually training 
+Not LoRA, not a VLM. Frozen job: 
+ Model: U-Net / U-Net++ , encoder EfficientNet-B0 or ResNet-34 (ImageNet 
+weights), decoder trained 
+ Task: 3-class tile segmentation: sea / look-alike / mineral oilmdpi 
+ Input: 512×512, VV+VH Sigma0 dB (duplicate VV if the encoder wants 3 channels) 
+ Data: Zenodo tiles only. No extra pretraining corpus 
+ Metric that matters: IoU on oil class on Part III, versus a −22 dB threshold 
+baseline 
+Literature on this exact dataset used a two-step CNN (classify then segment). You 
+only need the segmenter plus a look-alike class so false dark water does not go to 
+AIS.sciencedirect+1 
+U-Net inference on a 4070-class GPU is on the order of milliseconds per tile; a full 
+2048 scene is tiled inference in seconds, not minutes.mdpi 
+Time on your GPUs 
+Assumptions: 512 tiles, ~3k–6k train tiles from a 300–400 image subset, AdamW, 
+AMP, 40 epochs, batch 8 on P100 / 4 on T4 / 2–4 on 4060. 
+
+
+=== PAGE 17 ===
+
+Job 
+Machine 
+Wall clock 
+When 
+Sanity: 50 images, 5 
+epochs 
+Kaggle T4 or 
+P100 
+25–45 min 
+Tonight. 
+Proves 
+loaders + 
+IoU 
+Hackathon weights: 
+300–400 oil + look-
+alikes, 30–40 
+epochs 
+P100 16 GB 
+6–12 h (one long 
+session or 
+2×30 h quota) 
+This week 
+Same run 
+2×T4 (if the 
+notebook 
+actually uses 
+both) 
+8–16 h 
+T4 is slower 
+per GPU 
+Same run 
+RTX 4060 8 GB, 
+batch 2–4 
+14–24 h 
+overnight 
+Backup only 
+Full 1200 oil @ native 
+2048 
+Any of the above 
+Do not 
+Wastes disk 
+and quota 
+Demo inference, 5 
+scenes tiled 
+4060 or CPU 
+seconds–1 min 
+Pitch 
+Advection + AIS join 
+CPU 
+seconds 
+Pitch 
+A published oil-segmentation training run on an A100 was ~55 minutes for that 
+paper’s smaller setup; your subset on P100 should land in the half-day range, not 
+a multi-day LLM run.  
+Kaggle: ~30 h/account/week × 2 accounts is enough for one sanity run and one full 
+subset train, plus a retry. Train on Kaggle, copy oil_unet_best.pt (<100 MB) to the 
+laptop. Do not serve the judged demo from Kaggle. 
+If training slips: the threshold fallback (VV < −22 dB) still runs (a)(b)(c) so you are 
+not a blank screen. It is a baseline, not the model you pitch.  
+You can build what the PS asks without logins at demo time, without mocking SAR 
+or physics, and with synthetic AIS only when the chip is outside 
+MarineCadastre.open-meteo+1 
+Build: not started until these four files exist 
+1. 5 georeferenced demo TIFFs + copied-CRS masks 
+2. Metocean cache for those 5 centroids and times 
+3. AIS sqlite: real CSV if US bbox, else regional synthetic 
+4. test_advection (1 m/s × 3600 s ≈ 3.6 km) and test_scoring (no hardcoded winner) 
+
+
+=== PAGE 18 ===
+
+Then Antigravity implements the frozen spec + anti-slop rules. Training notebook is 
+parallel, not the critical path. 
+Skip click-to-inject spill, live APIs, OpenDrift-as-required, and SatQuery if this is the 
+entry. 
+ 
