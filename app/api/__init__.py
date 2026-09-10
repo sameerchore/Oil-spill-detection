@@ -1,0 +1,3 @@
+"""
+TideTrace API Module.
+"""
