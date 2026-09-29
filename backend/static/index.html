@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset=UTF-8 />
+  <meta name=viewport content=width=device-width, initial-scale=1.0 />
+  <title>Oil Spill Predictor // Maritime Environmental Monitoring</title>
+  <script>
+    window.onerror = function(msg, url, line, col, err) {
+      console.error('[DIAGNOSTIC_ERROR]', msg, 'AT:', url, 'LINE:', line, 'COL:', col);
+    };
+  </script>
+  
+  <!-- Vendored 100% Offline Leaflet 1.9.4 CSS -->
+  <link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css" />
+  
+  <!-- Tactical Dark Military HUD Styling -->
+  <link rel="stylesheet" href="/static/css/style.css?v=20260912_layerrows" />
+</head>
+<body>
+  <!-- TIDETRACE // NAVAL FORENSIC CONSOLE -->
+  <div id=app-container>
+    
+    <!-- 1. TOP NAVIGATION HUD BAR -->
+    <header id=top-nav>
+      <div class=brand-section>
+        <div class=brand-emblem>TT</div>
+        <div class=brand-title-group>
+        <div class=brand-title>Oil Spill Predictor</div>
+          <div class=brand-subtitle>MARITIME ENVIRONMENTAL MONITORING</div>
+        </div>
+      </div>
+
+      <div class=nav-controls>
+        <div class="select-wrapper scene-control">
+          <span class=select-label>Scene</span>
+          <select id=scene-select class=tactical-select>
+            <option value=scene_mumbai_001>Loading scene catalog...</option>
+          </select>
+        </div>
+
+        <div class="nav-action-group primary-actions">
+          <button id=btn-run class=btn-tactical-primary title=Execute full end-to-end detection, drift hindcast, and AIS attribution>
+            Run Attribution
+          </button>
+          <button id=btn-export-pdf class=btn-tactical-secondary title="Export binary ReportLab law-enforcement PDF dossier">
+            Export dossier
+          </button>
+        </div>
+
+        <div class="nav-action-group live-actions">
+          <button id="btn-live-ais" class="btn-tactical-secondary" title="Connect to live AISStream.io satellite/terrestrial transponders">
+            Live AIS
+          </button>
+          <button id="btn-live-metocean" class="btn-tactical-secondary" title="Fetch live ECMWF ERA5 winds & Copernicus Marine currents via Open-Meteo">
+            Live metocean
+          </button>
+        </div>
+
+        <div class="nav-status-group">
+          <div class="mode-toggle-group" title="Toggle between Live Streaming and Offline Cached Fail-Safe">
+            <button id="btn-mode-live" class="mode-badge-btn" title="Live streaming from AISStream.io & ECMWF ERA5">Live</button>
+            <button id="btn-mode-offline" class="mode-badge-btn active" title="Air-gapped pre-cached datasets (Fail-Safe)">Offline</button>
+          </div>
+          <div id=airgap-badge class=badge-airgap title="Zero live external API dependencies required for judging demo">
+            <div class=pulse-dot></div>
+            <span id="airgap-badge-text">OFFLINE MODE</span>
+          </div>
+          <div id=utc-clock class=time-hud>--:--:-- UTC</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. MAIN WORKSPACE WITH FULL-SCREEN TACTICAL MAP -->
+    <main id=main-workspace>
+      <div id=map></div>
+      <div class=crosshair-overlay></div>
+
+      <section class="analysis-summary" aria-label="Analysis summary">
+        <div class="summary-item summary-status-item">
+          <span class="summary-label">Analysis status</span>
+          <strong id="summary-status" class="summary-value status-neutral">Waiting</strong>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Oil confidence</span>
+          <strong id="summary-confidence" class="summary-value">—</strong>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Affected area</span>
+          <strong id="summary-area" class="summary-value">—</strong>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Vessels evaluated</span>
+          <strong id="summary-vessels" class="summary-value">—</strong>
+        </div>
+        <div class="summary-item summary-location">
+          <span class="summary-label">Scene centre</span>
+          <strong id="summary-coords" class="summary-value">—</strong>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Processed</span>
+          <strong id="summary-time" class="summary-value">—</strong>
+        </div>
+      </section>
+
+      <!-- Floating Layer Control Overlay -->
+      <div class=layer-controls-overlay>
+        <div class="layer-filter-row">
+          <span class="control-caption">Layers</span>
+          <button id="btn-focus-map" class="map-focus-btn" type="button" aria-pressed="false" title="Focus map: hide both side panels">Focus map</button>
+          <!-- Basemap Selector -->
+          <div class="basemap-switch-group">
+            <button id="btn-base-satellite" class="btn-basemap active" title="High-Resolution Earth Orbit Satellite Imagery">SATELLITE</button>
+            <button id="btn-base-nautical" class="btn-basemap" title="Dark Maritime Nautical Hydrographic Chart">NAUTICAL</button>
+            <button id="btn-base-grid" class="btn-basemap" title="Tactical Canvas Grid (Offline)">GRID</button>
+          </div>
+
+          <div class="layer-separator"></div>
+
+          <!-- SAR Radar Layer + Opacity + Palette -->
+          <label class=layer-toggle-item>
+            <input type=checkbox id=layer-toggle-sar checked />
+            <span class=layer-color-dot style="background:#8fa3bf; box-shadow:0 0 6px #8fa3bf;"></span>
+            <span>Sentinel-1 SAR</span>
+          </label>
+          <div class="opacity-control" title="Adjust SAR Radar Swath Opacity">
+            <input type="range" id="sar-opacity-slider" min="10" max="100" value="88" style="width:45px; height:4px; accent-color:var(--accent-cyan); cursor:pointer;" />
+          </div>
+          <select id="sar-palette-select" class="tactical-select" style="font-size:9px; height:20px; padding:0 3px; margin-left:4px; width:100px;" title="Tile Rendering Colormap">
+            <option value="radar_db">Radar dB (Gray)</option>
+            <option value="thermal">Thermal Void</option>
+            <option value="false_color">Dual-Pol False Color</option>
+          </select>
+        </div>
+
+        <div class="layer-checkbox-row">
+
+        <label class=layer-toggle-item>
+          <input type=checkbox id=layer-toggle-slick checked />
+          <span class=layer-color-dot style="background:#D6A84F;"></span>
+          <span>SAR Mineral Oil</span>
+        </label>
+        <label class=layer-toggle-item title="Hollow mask outline to inspect raw dark petroleum void underneath">
+          <input type=checkbox id=layer-toggle-hollow-mask />
+          <span style="font-size:9px; color:#D6A84F;">Hollow</span>
+        </label>
+        <label class=layer-toggle-item>
+          <input type=checkbox id=layer-toggle-lookalike checked />
+          <span class=layer-color-dot style="background:#D28A3A;"></span>
+          <span>Look-Alikes</span>
+        </label>
+        <label class=layer-toggle-item>
+          <input type=checkbox id=layer-toggle-origin checked />
+          <span class=layer-color-dot style="background:#D6A84F;"></span>
+          <span>90% Origin Zone</span>
+        </label>
+        <label class=layer-toggle-item>
+          <input type=checkbox id=layer-toggle-particles checked />
+          <span class=layer-color-dot style="background:#4FA89A;"></span>
+          <span>Particles</span>
+        </label>
+        <label class=layer-toggle-item>
+          <input type=checkbox id=layer-toggle-forecast checked />
+          <span class=layer-color-dot style="background:#81748D;"></span>
+          <span>36h Forecast</span>
+        </label>
+        <label class=layer-toggle-item>
+          <input type=checkbox id=layer-toggle-ais checked />
+          <span class=layer-color-dot style="background:#D65C5C;"></span>
+          <span>AIS Tracks</span>
+        </label>
+        <label class=layer-toggle-item title="Live real-time satellite/terrestrial AIS stream">
+          <input type=checkbox id=layer-toggle-live-ais checked />
+          <span class=layer-color-dot style="background:#4FA89A;"></span>
+          <span>Live AIS</span>
+        </label>
+
+        <!-- 512x512 Tiling Grid kept beside Live AIS for quick layer comparison -->
+        <label class=layer-toggle-item title="Render 512x512 U-Net inference tile boundaries">
+          <input type=checkbox id=layer-toggle-tiles />
+          <span class=layer-color-dot style="background:#4FA89A;"></span>
+          <span>512×512 Tiles</span>
+        </label>
+        </div>
+      </div>
+
+      <!-- Floating Left Panel: Suspect Leaderboard -->
+      <aside id=left-panel class=hud-panel>
+        <div class=panel-header>
+          <div class=panel-title>
+            <span>SUSPECT LEADERBOARD</span>
+          </div>
+          <span id=suspect-count-badge class=badge-airgap style=font-size:9px; padding:2px 6px;>0 CULPRITS</span>
+        </div>
+        <div class=panel-body>
+          <div class=tab-row>
+            <button class=tab-btn active data-tab=tab-suspects>RANKED SUSPECTS</button>
+            <button class=tab-btn data-tab=tab-dark-vessels>DARK VESSEL ANOMALIES</button>
+          </div>
+          <div id=tab-suspects class=tab-content>
+            <div id=suspect-list>
+              <div style=padding:20px; text-align:center; color:var(--text-muted); font-size:10px;>
+                Press <b>RUN ATTRIBUTION</b> or select a scene to initiate multi-factor AIS scoring.
+              </div>
+            </div>
+          </div>
+          <div id=tab-dark-vessels class=tab-content style=display:none;>
+            <div id=dark-vessel-list></div>
+          </div>
+        </div>
+      </aside>
+
+      <button id="toggle-left-panel" class="panel-dock-toggle panel-dock-left" type="button" aria-expanded="true" aria-controls="left-panel" title="Collapse suspect leaderboard">‹</button>
+
+      <!-- Floating Right Panel: Telemetry & Execution Trace -->
+      <aside id=right-panel class=hud-panel>
+        <div class=panel-header>
+          <div class=panel-title>
+            <span>TELEMETRY &amp; TRACE INSPECTOR</span>
+          </div>
+          <span id=total-time-badge style=font-size:9px; color:var(--accent-cyan);>0.0 ms</span>
+        </div>
+        <div class=panel-body>
+          <section class="panel-section sar-review" aria-labelledby="sar-review-title">
+            <div class="section-heading" id="sar-review-title">SAR review</div>
+            <div class="sar-preview-strip">
+              <button class="sar-preview active" data-palette="radar_db" type="button">
+                <img id="sar-preview-radar" src="/data/scenes/scene_mumbai_001_preview.png" alt="SAR radar view" />
+                <span>Radar dB</span>
+              </button>
+              <button class="sar-preview" data-palette="thermal" type="button">
+                <img id="sar-preview-thermal" src="/data/scenes/scene_mumbai_001_thermal.png" alt="Thermal contrast view" />
+                <span>Thermal</span>
+              </button>
+              <button class="sar-preview" data-palette="false_color" type="button">
+                <img id="sar-preview-false" src="/data/scenes/scene_mumbai_001_false_color.png" alt="Dual polarisation view" />
+                <span>Dual-pol</span>
+              </button>
+            </div>
+            <div class="review-note">Compare the segmentation boundary with the source raster using the map layers.</div>
+          </section>
+
+          <section class="panel-section technical-summary" aria-labelledby="technical-summary-title">
+            <div class="section-heading" id="technical-summary-title">Processing record</div>
+            <div class="technical-list">
+              <div><span>Sensor</span><strong>Sentinel-1 C-SAR</strong></div>
+              <div><span>Polarisation</span><strong id="summary-bands">VV / VH</strong></div>
+              <div><span>Segmentation</span><strong id="summary-model">U-Net · CPU</strong></div>
+              <div><span>Tile geometry</span><strong>512 px / 64 px overlap</strong></div>
+            </div>
+          </section>
+
+          <!-- Morphological Descriptors -->
+          <div class="section-heading">
+            SLICK GEOMETRY DESCRIPTORS (LOCAL AEQD)
+          </div>
+          <div id=telemetry-container class=telemetry-grid>
+            <div class=telemetry-item>
+              <div class=telemetry-label>AREA (km&#178;)</div>
+              <div id=tel-area class=telemetry-value magenta>--</div>
+            </div>
+            <div class=telemetry-item>
+              <div class=telemetry-label>PERIMETER (km)</div>
+              <div id=tel-perimeter class=telemetry-value>--</div>
+            </div>
+            <div class=telemetry-item>
+              <div class=telemetry-label>MAX FERET LENGTH</div>
+              <div id=tel-length class=telemetry-value>--</div>
+            </div>
+            <div class=telemetry-item>
+              <div class=telemetry-label>HYDRAULIC WIDTH</div>
+              <div id=tel-width class=telemetry-value>--</div>
+            </div>
+            <div class=telemetry-item>
+              <div class=telemetry-label>PCA ORIENTATION (&theta;)</div>
+              <div id=tel-orientation class=telemetry-value yellow>--</div>
+            </div>
+            <div class=telemetry-item>
+              <div class=telemetry-label>COMPACTNESS</div>
+              <div id=tel-compactness class=telemetry-value>--</div>
+            </div>
+          </div>
+
+          <!-- Metocean & Drift Physics -->
+          <div class="section-heading">
+            METOCEAN DRIFT PARAMETERS
+          </div>
+          <div id=metocean-container class=telemetry-grid>
+            <div class=telemetry-item>
+              <div class=telemetry-label>ORIGIN RELEASE TIME</div>
+              <div id=tel-origin-time class=telemetry-value style=font-size:9.5px;>--</div>
+            </div>
+            <div class=telemetry-item>
+              <div class=telemetry-label>DRIFT AGE (HOURS)</div>
+              <div id=tel-drift-age class=telemetry-value green>--</div>
+            </div>
+            <div class=telemetry-item>
+              <div class=telemetry-label>TOTAL HINDCAST DRIFT</div>
+              <div id=tel-hindcast-drift class=telemetry-value>--</div>
+            </div>
+            <div class=telemetry-item>
+              <div class=telemetry-label>36h FORECAST DRIFT</div>
+              <div id=tel-forecast-drift class=telemetry-value>--</div>
+            </div>
+          </div>
+
+          <!-- Execution Trace Logs -->
+          <div class="section-heading">
+            STEP-BY-STEP EXECUTION TRACE
+          </div>
+          <div id=trace-log-container>
+            <div style=color:var(--text-muted); font-size:9px;>Execution trace pending...</div>
+          </div>
+        </div>
+      </aside>
+
+      <button id="toggle-right-panel" class="panel-dock-toggle panel-dock-right" type="button" aria-expanded="true" aria-controls="right-panel" title="Collapse telemetry and trace inspector">›</button>
+
+      <button id="btn-map-fullscreen" class="map-fullscreen-btn" type="button" aria-pressed="false" title="Show map only">
+        <span class="map-fullscreen-label">Full screen</span>
+      </button>
+
+      <!-- 3. BOTTOM SYNCHRONIZED TIMELINE SCRUBBER -->
+      <footer id=bottom-timeline>
+        <div class=timeline-playback-group>
+          <button id=btn-reset-orig class=btn-ctrl title=Jump to Backtracked Origin Time [T_orig]>&#9646;&#9664;</button>
+          <button id=btn-step-back class=btn-ctrl title=Step Back 1 Hour>&#9664;</button>
+          <button id=btn-play-pause class=btn-ctrl style=width:34px; height:34px; font-size:14px; title=Play / Pause Timeline Animation>&#9654;</button>
+          <button id=btn-step-fwd class=btn-ctrl title=Step Forward 1 Hour>&#9654;</button>
+          <button id=btn-reset-sat class=btn-ctrl title=Jump to Satellite Pass Time [T_sat]>&#9654;&#9646;</button>
+          <select id=select-speed class=tactical-select style=min-width:60px; padding:4px 6px; font-size:10px;>
+            <option value=1>1x</option>
+            <option value=2>2x</option>
+            <option value=5 selected>5x</option>
+            <option value=10>10x</option>
+          </select>
+        </div>
+
+        <div class=scrubber-container>
+          <div class=scrubber-labels>
+            <span id=lbl-timeline-start>T_origin</span>
+            <span id=lbl-timeline-sat style=color:var(--accent-magenta);>T_sat (Detection)</span>
+            <span id=lbl-timeline-end>T_sat + 36h</span>
+          </div>
+          <input type=range id=time-scrubber class=scrubber-slider min=0 max=100 value=0 />
+        </div>
+
+        <div id=current-time-hud class=timeline-hud-time>
+          2026-09-02T12:00:00Z
+        </div>
+      </footer>
+    </main>
+
+    <!-- 4. VESSEL DETAIL MODAL DIALOG -->
+    <div id=vessel-modal class=modal-backdrop>
+      <div class=modal-box>
+        <div class=modal-header>
+          <div class=modal-title id=modal-vessel-title>VESSEL FORENSIC DOSSIER</div>
+          <button id=modal-close-btn class=modal-close-btn>&times;</button>
+        </div>
+        <div id=modal-vessel-body class=modal-body-content></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Vendored 100% Offline Leaflet 1.9.4 JS -->
+  <script src="/static/vendor/leaflet/leaflet.js"></script>
+
+  <!-- Modular Console Scripts -->
+  <script src="/static/js/map.js?v=20260912_noemoji"></script>
+  <script src="/static/js/timeline.js?v=20260912_palette"></script>
+  <script src="/static/js/ui.js?v=20260912_noemoji"></script>
+  <script src="/static/js/app.js?v=20260912_noemoji"></script>
+</body>
+</html>

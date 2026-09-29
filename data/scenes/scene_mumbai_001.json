@@ -1,0 +1,50 @@
+{
+  "scene_id": "scene_mumbai_001",
+  "title": "Arabian Sea \u2014 Mumbai High Offshore Platform Sector",
+  "description": "Elongated mineral oil spill from crude tanker transit with nearby biogenic look-alike slick.",
+  "t_sat": "2026-09-02T12:00:00Z",
+  "centroid": [
+    18.95,
+    72.15
+  ],
+  "bounds": [
+    18.75,
+    71.95,
+    19.15,
+    72.35
+  ],
+  "crs": "EPSG:4326",
+  "affine": [
+    0.0001953125,
+    0.0,
+    71.95,
+    0.0,
+    -0.0001953125,
+    19.15
+  ],
+  "shape": [
+    2048,
+    2048
+  ],
+  "bands": [
+    "VV_dB",
+    "VH_dB"
+  ],
+  "pixel_size_m": 20.0,
+  "expected_metrics": {
+    "oil_area_km2": 4.85,
+    "lookalike_area_km2": 1.25,
+    "drift_age_hours": 18
+  },
+  "culprit": {
+    "mmsi": 419000001,
+    "name": "MT OCEAN VOYAGER"
+  },
+  "files": {
+    "tif": "data/scenes/scene_mumbai_001.tif",
+    "npy": "data/scenes/scene_mumbai_001.npy",
+    "mask": "data/scenes/scene_mumbai_001_mask.npy",
+    "preview": "data/scenes/scene_mumbai_001_preview.png",
+    "json": "data/scenes/scene_mumbai_001.json"
+  }
+}

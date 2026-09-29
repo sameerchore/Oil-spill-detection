@@ -1,0 +1,50 @@
+{
+  "scene_id": "scene_gom_003",
+  "title": "Gulf of Mexico \u2014 Mississippi Canyon Deepwater Sector",
+  "description": "Deepwater oil discharge drifting under Loop Current eddy advection.",
+  "t_sat": "2026-08-30T06:00:00Z",
+  "centroid": [
+    28.75,
+    -88.35
+  ],
+  "bounds": [
+    28.55,
+    -88.55,
+    28.95,
+    -88.15
+  ],
+  "crs": "EPSG:4326",
+  "affine": [
+    0.0001953125,
+    0.0,
+    -88.55,
+    0.0,
+    -0.0001953125,
+    28.95
+  ],
+  "shape": [
+    2048,
+    2048
+  ],
+  "bands": [
+    "VV_dB",
+    "VH_dB"
+  ],
+  "pixel_size_m": 20.0,
+  "expected_metrics": {
+    "oil_area_km2": 5.6,
+    "lookalike_area_km2": 0.0,
+    "drift_age_hours": 20
+  },
+  "culprit": {
+    "mmsi": 367000001,
+    "name": "MT GULF DISCOVERY"
+  },
+  "files": {
+    "tif": "data/scenes/scene_gom_003.tif",
+    "npy": "data/scenes/scene_gom_003.npy",
+    "mask": "data/scenes/scene_gom_003_mask.npy",
+    "preview": "data/scenes/scene_gom_003_preview.png",
+    "json": "data/scenes/scene_gom_003.json"
+  }
+}

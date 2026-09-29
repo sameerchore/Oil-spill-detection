@@ -1,0 +1,50 @@
+{
+  "scene_id": "scene_chennai_002",
+  "title": "Bay of Bengal \u2014 Ennore / Chennai Coastal Corridor",
+  "description": "Heavy bunker fuel discharge along the Coromandel commercial shipping lane.",
+  "t_sat": "2026-09-01T18:30:00Z",
+  "centroid": [
+    13.25,
+    80.35
+  ],
+  "bounds": [
+    13.05,
+    80.15,
+    13.45,
+    80.55
+  ],
+  "crs": "EPSG:4326",
+  "affine": [
+    0.0001953125,
+    0.0,
+    80.15,
+    0.0,
+    -0.0001953125,
+    13.45
+  ],
+  "shape": [
+    2048,
+    2048
+  ],
+  "bands": [
+    "VV_dB",
+    "VH_dB"
+  ],
+  "pixel_size_m": 20.0,
+  "expected_metrics": {
+    "oil_area_km2": 3.2,
+    "lookalike_area_km2": 0.0,
+    "drift_age_hours": 16
+  },
+  "culprit": {
+    "mmsi": 419000101,
+    "name": "MT COROMANDEL GLORY"
+  },
+  "files": {
+    "tif": "data/scenes/scene_chennai_002.tif",
+    "npy": "data/scenes/scene_chennai_002.npy",
+    "mask": "data/scenes/scene_chennai_002_mask.npy",
+    "preview": "data/scenes/scene_chennai_002_preview.png",
+    "json": "data/scenes/scene_chennai_002.json"
+  }
+}

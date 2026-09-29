@@ -1,0 +1,85 @@
+{
+  "scenes": [
+    {
+      "id": "scene_mumbai_001",
+      "title": "Arabian Sea \u2014 Mumbai High Offshore Platform Sector",
+      "description": "Elongated mineral oil spill from crude tanker transit with nearby biogenic look-alike slick.",
+      "t_sat": "2026-09-02T12:00:00Z",
+      "centroid": [
+        18.95,
+        72.15
+      ],
+      "bounds": [
+        18.75,
+        71.95,
+        19.15,
+        72.35
+      ],
+      "has_oil": true,
+      "oil_area_km2": 4.85,
+      "thumbnail": "/data/scenes/scene_mumbai_001_preview.png",
+      "path": "data/scenes/scene_mumbai_001.tif"
+    },
+    {
+      "id": "scene_chennai_002",
+      "title": "Bay of Bengal \u2014 Ennore / Chennai Coastal Corridor",
+      "description": "Heavy bunker fuel discharge along the Coromandel commercial shipping lane.",
+      "t_sat": "2026-09-01T18:30:00Z",
+      "centroid": [
+        13.25,
+        80.35
+      ],
+      "bounds": [
+        13.05,
+        80.15,
+        13.45,
+        80.55
+      ],
+      "has_oil": true,
+      "oil_area_km2": 3.2,
+      "thumbnail": "/data/scenes/scene_chennai_002_preview.png",
+      "path": "data/scenes/scene_chennai_002.tif"
+    },
+    {
+      "id": "scene_gom_003",
+      "title": "Gulf of Mexico \u2014 Mississippi Canyon Deepwater Sector",
+      "description": "Deepwater oil discharge drifting under Loop Current eddy advection.",
+      "t_sat": "2026-08-30T06:00:00Z",
+      "centroid": [
+        28.75,
+        -88.35
+      ],
+      "bounds": [
+        28.55,
+        -88.55,
+        28.95,
+        -88.15
+      ],
+      "has_oil": true,
+      "oil_area_km2": 5.6,
+      "thumbnail": "/data/scenes/scene_gom_003_preview.png",
+      "path": "data/scenes/scene_gom_003.tif"
+    },
+    {
+      "id": "scene_clean_004",
+      "title": "Arabian Sea \u2014 Open Ocean (Clean Sea True-Negative Benchmark)",
+      "description": "True-negative clean ocean scene verifying that pipeline handles zero-spill detections cleanly.",
+      "t_sat": "2026-09-02T06:00:00Z",
+      "centroid": [
+        18.0,
+        71.0
+      ],
+      "bounds": [
+        17.8,
+        70.8,
+        18.2,
+        71.2
+      ],
+      "has_oil": false,
+      "oil_area_km2": 0.0,
+      "thumbnail": "/data/scenes/scene_clean_004_preview.png",
+      "path": "data/scenes/scene_clean_004.tif"
+    }
+  ],
+  "total": 4
+}

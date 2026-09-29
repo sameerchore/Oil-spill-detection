@@ -1,0 +1,49 @@
+{
+  "scene_id": "scene_clean_004",
+  "title": "Arabian Sea \u2014 Open Ocean (Clean Sea True-Negative Benchmark)",
+  "description": "True-negative clean ocean scene verifying that pipeline handles zero-spill detections cleanly.",
+  "t_sat": "2026-09-02T06:00:00Z",
+  "centroid": [
+    18.0,
+    71.0
+  ],
+  "bounds": [
+    17.8,
+    70.8,
+    18.2,
+    71.2
+  ],
+  "crs": "EPSG:4326",
+  "affine": [
+    0.0001953125,
+    0.0,
+    70.8,
+    0.0,
+    -0.0001953125,
+    18.2
+  ],
+  "shape": [
+    2048,
+    2048
+  ],
+  "bands": [
+    "VV_dB",
+    "VH_dB"
+  ],
+  "pixel_size_m": 20.0,
+  "expected_metrics": {
+    "oil_area_km2": 0.0,
+    "lookalike_area_km2": 0.0
+  },
+  "culprit": {
+    "mmsi": null,
+    "name": null
+  },
+  "files": {
+    "tif": "data/scenes/scene_clean_004.tif",
+    "npy": "data/scenes/scene_clean_004.npy",
+    "mask": "data/scenes/scene_clean_004_mask.npy",
+    "preview": "data/scenes/scene_clean_004_preview.png",
+    "json": "data/scenes/scene_clean_004.json"
+  }
+}

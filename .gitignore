@@ -45,3 +45,20 @@ scripts/kaggle_output/artifacts/
 *.log
 Thumbs.db
 .DS_Store
+
+# Large data files & model weights (use Git LFS, DVC, or GitHub Releases)
+data/models/*.pt
+data/scenes/*.npy
+data/scenes/*.tif
+data/scenes/*_false_color.png
+data/scenes/*_thermal.png
+data/scenes/*_preview.png
+data/scenes/*_mask.npy
+data/metocean/*.json
+data/ais/*.sqlite
+data/ais/*.db
+models/*.pt
+*.pdf
+current_ui_view.png
+diagnostic_initial.png
+updated_*.png
