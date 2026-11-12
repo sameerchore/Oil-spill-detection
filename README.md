@@ -20,7 +20,6 @@
 ---
 
 ## 1. Architecture & System Overview
-Oil Spill Detection is designed for the National Technical Research Organisation (NTRO) with dual operational modes:
 1. **⚡ LIVE PRODUCTION MODE**: Ingests real-time AIS transponder streams via WebSocket (`wss://stream.aisstream.io/v0/stream`) and fetches live hourly ERA5 winds & Copernicus Marine currents via Open-Meteo.
 2. **🛡 OFFLINE FAIL-SAFE MODE**: 100% self-contained and air-gapped with pre-cached verified datasets (for hackathons, field operations, and judging without internet).
 The system takes satellite SAR imagery (Sentinel-1 VV/VH), executes 3-class semantic segmentation (sea, look-alike, mineral oil) with a morphological descriptor engine, calculates 2D Lagrangian backward drift to identify the origin time and zone, reconstructs historical AIS vessel traffic, and computes a multi-factor explainable attribution score identifying the responsible vessel.
