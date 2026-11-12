@@ -1,5 +1,5 @@
 # Oil Spill Detection // Naval Forensic Oil Spill Attribution Console
-### SIH 2026 Problem Statement ID: 26143 // National Technical Research Organisation (NTRO)
+### SIH 2026 Problem Statement ID: 26143 
 
 > **Oil Spill Detection** is an intelligence-grade, dual-mode (real-time live streaming & air-gapped offline fail-safe) maritime forensic platform that detects marine oil slicks on Sentinel-1 SAR imagery, backtracks their drift using 2D Lagrangian metocean numerical physics, and correlates spatio-temporal AIS vessel trajectories to identify and legally indict the polluting vessel.
 
